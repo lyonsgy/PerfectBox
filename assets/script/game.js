@@ -4,7 +4,8 @@ cc.Class({
     properties: {
         blockNode: cc.Node,
         wallNodeArr: [cc.Node],
-        baseNodeArr: [cc.Node]
+        baseNodeArr: [cc.Node],
+        scoreLabel: cc.Label,
     },
 
     onLoad () {
@@ -66,7 +67,8 @@ cc.Class({
             cc.moveTo(0.7, cc.v2(0, desY)).easing(cc.easeBounceOut()),
             cc.callFunc(() => {
                 if (success) {
-                    this.init()
+                    this.updateScore(1)
+                    this.nextLevel()
                 } else {
                     this.gameOver()
                 }
@@ -78,9 +80,8 @@ cc.Class({
         cc.director.loadScene('game')
     },
     init () {
-        this.gameState = 'idle'
-        this.resetWall()
-        this.resetBlock()
+        this.score = 0
+        this.nextLevel()
     },
 
     placeWall (node, desX) {
@@ -107,5 +108,14 @@ cc.Class({
 
             })
         ))
+    },
+    nextLevel () {
+        this.gameState = 'idle'
+        this.resetWall()
+        this.resetBlock()
+    },
+    updateScore (incr) {
+        this.score += incr
+        this.scoreLabel.string = this.score
     }
 });
