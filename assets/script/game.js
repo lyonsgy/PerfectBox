@@ -10,12 +10,16 @@ cc.Class({
     onLoad () {
         this.node.on('touchstart', this.grow, this)
         this.node.on('touchend', this.stop, this)
+
+        this.init()
     },
     onDestroy () {
         this.node.off('touchstart', this.grow, this)
         this.node.off('touchend', this.stop, this)
     },
     grow (e) {
+        if (this.gameState != 'idle') return
+        this.gameState = 'grow'
         let seq = cc.sequence(
             cc.scaleTo(1, 4),
             cc.callFunc(() => {
@@ -25,9 +29,11 @@ cc.Class({
         this.growAction = this.blockNode.runAction(seq)
     },
     stop (e) {
+        if (this.gameState != 'grow') return
+        this.gameState = 'rota'
+
         this.blockNode.stopAction(this.growAction)
 
-        // this.rotaAction = this.blockNode.runAction(cc.rotateTo(0.15, 0))
         this.blockNode.runAction(cc.sequence(
             cc.rotateTo(0.15, 0),
             cc.callFunc(() => {
@@ -57,20 +63,49 @@ cc.Class({
             desY += this.wallNodeArr[0].height
         }
         this.blockNode.runAction(cc.sequence(
-            cc.moveTo(0.7, cc.v2(0, desY)),
+            cc.moveTo(0.7, cc.v2(0, desY)).easing(cc.easeBounceOut()),
             cc.callFunc(() => {
-                console.log('碰撞')
-                this.gameOver()
+                if (success) {
+                    this.init()
+                } else {
+                    this.gameOver()
+                }
             })
         ))
     },
     gameOver () {
         console.log('游戏结束')
-
+        cc.director.loadScene('game')
     },
-    start () {
-
+    init () {
+        this.gameState = 'idle'
+        this.resetWall()
+        this.resetBlock()
     },
 
-    // update (dt) {},
+    placeWall (node, desX) {
+        node.runAction(cc.moveTo(0.5, cc.v2(desX, node.y)).easing(cc.easeQuadraticActionIn()))
+    },
+
+    resetWall () {
+        let baseGap = 100 + Math.random() * 100
+        let wallGap = baseGap + 30 + Math.random() * 80
+        this.placeWall(this.baseNodeArr[0], - baseGap / 2)
+        this.placeWall(this.baseNodeArr[1], baseGap / 2)
+        this.placeWall(this.wallNodeArr[0], - wallGap / 2)
+        this.placeWall(this.wallNodeArr[1], wallGap / 2)
+    },
+
+    resetBlock () {
+        this.blockNode.runAction(cc.sequence(
+            cc.spawn(
+                cc.rotateTo(0.5, -45),
+                cc.moveTo(0.5, cc.v2(0, 400)),
+                cc.scaleTo(0.5, 1)
+            ),
+            cc.callFunc(() => {
+
+            })
+        ))
+    }
 });
