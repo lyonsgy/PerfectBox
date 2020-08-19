@@ -11,7 +11,6 @@ cc.Class({
     onLoad () {
         this.node.on('touchstart', this.grow, this)
         this.node.on('touchend', this.stop, this)
-
         this.init()
     },
     onDestroy () {
@@ -82,6 +81,7 @@ cc.Class({
     init () {
         this.score = 0
         this.nextLevel()
+        this.resetBgColor()
     },
 
     placeWall (node, desX) {
@@ -108,6 +108,11 @@ cc.Class({
 
             })
         ))
+    },
+    resetBgColor () {
+        let colors = ['#4cb4e7', '#ffc09f', '#c7b3e5', '#588c7e', '#a3a380']
+        this.node.color = cc.Color.BLACK.fromHEX(colors[parseInt(Math.random() * colors.length)])
+
     },
     nextLevel () {
         this.gameState = 'idle'
