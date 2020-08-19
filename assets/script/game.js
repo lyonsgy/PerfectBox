@@ -6,6 +6,7 @@ cc.Class({
         wallNodeArr: [cc.Node],
         baseNodeArr: [cc.Node],
         scoreLabel: cc.Label,
+        tarLabel: cc.Label,
     },
 
     onLoad () {
@@ -67,7 +68,7 @@ cc.Class({
             cc.callFunc(() => {
                 if (success) {
                     this.updateScore(1)
-                    this.nextLevel()
+                    this.nextLevelCheck()
                 } else {
                     this.gameOver()
                 }
@@ -78,9 +79,11 @@ cc.Class({
         console.log('游戏结束')
         cc.director.loadScene('game')
     },
-    init () {
-        this.score = 0
-        this.nextLevel()
+    init (level = 1, score = 0) {
+        this.level = level
+        this.tar = this.level
+        this.score = score
+        this.nextLevelCheck()
         this.resetBgColor()
     },
 
@@ -100,7 +103,7 @@ cc.Class({
     resetBlock () {
         this.blockNode.runAction(cc.sequence(
             cc.spawn(
-                cc.rotateTo(0.5, -45),
+                cc.rotateTo(0.5, 45),
                 cc.moveTo(0.5, cc.v2(0, 400)),
                 cc.scaleTo(0.5, 1)
             ),
@@ -112,15 +115,21 @@ cc.Class({
     resetBgColor () {
         let colors = ['#4cb4e7', '#ffc09f', '#c7b3e5', '#588c7e', '#a3a380']
         this.node.color = cc.Color.BLACK.fromHEX(colors[parseInt(Math.random() * colors.length)])
-
     },
-    nextLevel () {
+    nextLevelCheck () {
+        if (this.tar === 0) {
+            this.init(this.level + 1, this.score)
+            this.scoreLabel.string = `score:${this.score}\nlevel:${this.level}`
+            return
+        }
+        this.tarLabel.string = this.tar
         this.gameState = 'idle'
         this.resetWall()
         this.resetBlock()
     },
     updateScore (incr) {
         this.score += incr
-        this.scoreLabel.string = this.score
+        this.scoreLabel.string = `score:${this.score}\nlevel:${this.level}`
+        this.tar -= incr
     }
 });
